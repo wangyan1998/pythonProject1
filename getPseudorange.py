@@ -25,6 +25,24 @@ def LLA_to_XYZ(latitude, longitude, altitude):
     return numpy.array([X, Y, Z])
 
 
+def XYZ_to_LLA(X, Y, Z):
+    # WGS84坐标系的参数
+    a = 6378137.0  # 椭球长半轴
+    b = 6356752.314245  # 椭球短半轴
+    ea = numpy.sqrt((a ** 2 - b ** 2) / a ** 2)
+    eb = numpy.sqrt((a ** 2 - b ** 2) / b ** 2)
+    p = numpy.sqrt(X ** 2 + Y ** 2)
+    theta = numpy.arctan2(Z * a, p * b)
+
+    # 计算经纬度及海拔
+    longitude = numpy.arctan2(Y, X)
+    latitude = numpy.arctan2(Z + eb ** 2 * b * numpy.sin(theta) ** 3, p - ea ** 2 * a * numpy.cos(theta) ** 3)
+    N = a / numpy.sqrt(1 - ea ** 2 * numpy.sin(latitude) ** 2)
+    altitude = p / numpy.cos(latitude) - N
+
+    return numpy.array([numpy.degrees(latitude), numpy.degrees(longitude), altitude])
+
+
 def get_distance1(position1, position2, clk):
     v1 = LLA_to_XYZ(position1[0], position1[1], position1[2])
     v2 = LLA_to_XYZ(position2[0], position2[1], position2[2])
@@ -38,13 +56,16 @@ def get_distance2(pos1, pos2, clk):
     v1 = numpy.array([pos1[0], pos1[1], pos1[2]])
     v2 = numpy.array([pos2[0], pos2[1], pos2[2]])
     distance = numpy.linalg.norm(v1 - v2)
-    res = distance + (3 * 10 ** 8) * clk[0]
+    res = distance - (3 * 10 ** 8) * clk[0]
 
     return res
 
 
 solved = get_distance1([-1.11933, 90.79556, 20164300.4], [30.51556, 114.49100, 74.3385], [0.000104647296])
 solved1 = get_distance2([-2279829.2223, 5004708.9330, 3219779.0345], [-368461.739, 26534822.568, -517664.322],
-                        [0.000104647296])
+                        [-0.000104647296])
+pos = [-2279772.39208934,  5004740.35324707,  3219737.89319037]
+solved2 = XYZ_to_LLA(pos[0], pos[1], pos[2])
 print(solved)
 print(solved1)
+print(solved2)
