@@ -2,14 +2,8 @@ from __future__ import print_function
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from torchvision import datasets, transforms
-import numpy as np
-import matplotlib.pyplot as plt
 
-# epsilons = [0, .05, .1, .15, .2, .25, .3, .35]
-epsilons = [.3, .35]
-pretrained_model = "lenet_mnist_model.pth"
+pretrained_model = "./mymodel/model11.pth"
 use_cuda = True
 
 
@@ -78,20 +72,9 @@ def fgsm_attack(image, epsilon, data_grad):
 
 
 def test(model, device, data, target, epsilon):
-    # plt.imshow(data, cmap="gray")
-    # print(data.shape)
-    # print("目标1")
-    # print(target)
-    # print(data.shape)
-    # print("数据1")
-    # print(data)
     # Send the data and label to the device
     # 将数据和标签发送到设备
     data, target = data.to(device), target.to(device)
-    # print("目标")
-    # print(target)
-    # print("数据")
-    # print(data)
 
     # Set requires_grad attribute of tensor. Important for Attack
     # 集合需要张量的梯度属性。对攻击很重要
@@ -100,7 +83,11 @@ def test(model, device, data, target, epsilon):
     # Forward pass the data through the model
     # 通过模型前向传播数据
     output = model(data)
+    print("output:")
     print(output)
+    print(output)
+    print("target:")
+    print(target)
 
     init_pred = output.max(1, keepdim=True)[1]  # get the index of the max log-probability
     print(init_pred)
@@ -108,8 +95,9 @@ def test(model, device, data, target, epsilon):
     # If the initial prediction is wrong, dont bother attacking, just move on
 
     # Calculate the loss
-    loss = F.nll_loss(output, target)
-    # print(loss)
+    # loss = F.nll_loss(output, target)
+    loss=output[0][target[0]]
+    print(loss)
     # print(loss.shape)
 
     # Zero all existing gradients
@@ -120,7 +108,6 @@ def test(model, device, data, target, epsilon):
 
     # Collect datagrad
     data_grad = data.grad.data
-    # print(data_grad[0])
 
     # Call FGSM Attack
     perturbed_data = fgsm_attack(data, epsilon, data_grad)
@@ -141,36 +128,3 @@ def test(model, device, data, target, epsilon):
 accuracies = []
 examples = []
 acc, ex = test(model, device, data, target, 0.05)
-# print(acc)
-# print(ex)
-# # Run test for each epsilon
-# for eps in epsilons:
-#     acc, ex = test(model, device, test_loader, eps)
-#     accuracies.append(acc)
-#     examples.append(ex)
-#
-# plt.figure(figsize=(5, 5))
-# plt.plot(epsilons, accuracies, "*-")
-# plt.yticks(np.arange(0, 1.1, step=0.1))
-# plt.xticks(np.arange(0, .35, step=0.05))
-# plt.title("Accuracy vs Epsilon")
-# plt.xlabel("Epsilon")
-# plt.ylabel("Accuracy")
-# plt.show()
-#
-# # Plot several examples of adversarial samples at each epsilon
-# cnt = 0
-# plt.figure(figsize=(8, 10))
-# for i in range(len(epsilons)):
-#     for j in range(len(examples[i])):
-#         cnt += 1
-#         plt.subplot(len(epsilons), len(examples[0]), cnt)
-#         plt.xticks([], [])
-#         plt.yticks([], [])
-#         if j == 0:
-#             plt.ylabel("Eps: {}".format(epsilons[i]), fontsize=14)
-#         orig, adv, ex = examples[i][j]
-#         plt.title("{} -> {}".format(orig, adv))
-#         plt.imshow(ex, cmap="gray")
-# plt.tight_layout()
-# plt.show()
