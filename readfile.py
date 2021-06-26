@@ -1,12 +1,4 @@
 import csv
-import pandas as pd
-import numpy as np
-import xlsxwriter
-import xlwt
-
-
-# workbook = xlsxwriter.Workbook('D:\\Desktop\\result.xlsx')
-# worksheet = workbook.add_worksheet()
 
 
 def getdata(i):

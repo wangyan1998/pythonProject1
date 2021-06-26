@@ -95,8 +95,8 @@ def test(model, device, data, target, epsilon):
     # If the initial prediction is wrong, dont bother attacking, just move on
 
     # Calculate the loss
-    # loss = F.nll_loss(output, target)
-    loss=output[0][target[0]]
+    loss = F.nll_loss(output, target)
+    # loss=output[0][target[0]]
     print(loss)
     # print(loss.shape)
 
